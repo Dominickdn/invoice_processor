@@ -7,6 +7,7 @@ from processor import process_file
 
 load_dotenv()
 
+
 def callback(ch, method, properties, body):
     msg = json.loads(body)
     filename = msg.get("filename")
@@ -20,34 +21,37 @@ def callback(ch, method, properties, body):
     result_msg = {
         "filename": filename,
         "status": "processed ocr-worker" if success else "failed ocr-worker",
-        "text": text if success else None
+        "text": text if success else None,
     }
 
     ch.basic_publish(
         exchange="",
         routing_key=os.getenv("RABBITMQ_QUEUE_OCR_RESULTS"),
-        body=json.dumps(result_msg)
+        body=json.dumps(result_msg),
     )
 
     ch.basic_ack(delivery_tag=method.delivery_tag)
     print(f"[INFO] {filename} -> {result_msg['status']}")
 
+
 def main():
     credentials = pika.PlainCredentials(
-        os.getenv("RABBITMQ_USER"),
-        os.getenv("RABBITMQ_PASS")
+        os.getenv("RABBITMQ_USER"), os.getenv("RABBITMQ_PASS")
     )
     params = pika.ConnectionParameters(
         host=os.getenv("RABBITMQ_HOST"),
         port=int(os.getenv("RABBITMQ_PORT")),
-        credentials=credentials
+        credentials=credentials,
     )
 
     # Retry connection loop
     connection = None
     for attempt in range(1, 6):
         try:
-            print(f"[INFO] Attempting to connect to RabbitMQ (try {attempt}/5)...")
+            print(
+                "[INFO] Attempting to connect "
+                f"to RabbitMQ (try {attempt}/5)..."
+            )
             connection = pika.BlockingConnection(params)
             print("[INFO] Connected to RabbitMQ.")
             break
@@ -56,7 +60,9 @@ def main():
             time.sleep(5)
 
     if not connection:
-        print("[ERROR] Could not connect to RabbitMQ after 5 attempts. Exiting.")
+        print(
+            "[ERROR] Could not connect to RabbitMQ after 5 attempts. Exiting."
+        )
         return
 
     channel = connection.channel()
@@ -66,12 +72,10 @@ def main():
     print("[INFO] Awaiting invoice messages...")
 
     channel.basic_consume(
-        queue=in_queue,
-        on_message_callback=callback,
-        auto_ack=False
+        queue=in_queue, on_message_callback=callback, auto_ack=False
     )
     channel.start_consuming()
 
+
 if __name__ == "__main__":
     main()
-

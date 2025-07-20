@@ -5,6 +5,7 @@ from pathlib import Path
 
 load_dotenv()
 
+
 def init_db():
     try:
         conn = psycopg2.connect(
@@ -12,7 +13,7 @@ def init_db():
             port=os.getenv("POSTGRES_PORT"),
             database=os.getenv("POSTGRES_DB"),
             user=os.getenv("POSTGRES_USER"),
-            password=os.getenv("POSTGRES_PASSWORD")
+            password=os.getenv("POSTGRES_PASSWORD"),
         )
         cur = conn.cursor()
 
@@ -28,6 +29,7 @@ def init_db():
         if conn:
             cur.close()
             conn.close()
+
 
 if __name__ == "__main__":
     init_db()

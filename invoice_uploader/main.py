@@ -11,7 +11,7 @@ app.secret_key = "supersecret"
 
 # S3 config
 s3 = boto3.client(
-    's3',
+    "s3",
     endpoint_url=os.getenv("MINIO_ENDPOINT"),
     aws_access_key_id=os.getenv("MINIO_ACCESS_KEY"),
     aws_secret_access_key=os.getenv("MINIO_SECRET_KEY"),
@@ -19,6 +19,7 @@ s3 = boto3.client(
 
 BUCKET = os.getenv("MINIO_BUCKET")
 UPLOAD_PREFIX = "process/"
+
 
 @app.route("/")
 def index():
@@ -30,6 +31,7 @@ def index():
         if not key.endswith("/"):
             files.append(key.replace(UPLOAD_PREFIX, ""))  # strip prefix
     return render_template("index.html", files=files)
+
 
 @app.route("/upload", methods=["POST"])
 def upload():
@@ -50,16 +52,23 @@ def upload():
         flash(f"Uploaded: {filename}")
     return redirect(url_for("index"))
 
+
 @app.route("/status")
 def status():
     def list_files(prefix):
         response = s3.list_objects_v2(Bucket=BUCKET, Prefix=prefix)
         contents = response.get("Contents", [])
-        return [obj["Key"].replace(prefix, "") for obj in contents if not obj["Key"].endswith("/")]
+        return [
+            obj["Key"].replace(prefix, "")
+            for obj in contents
+            if not obj["Key"].endswith("/")
+        ]
 
     processed_files = list_files("processed/")
     failed_files = list_files("failed/")
-    return render_template("status.html", processed=processed_files, failed=failed_files)
+    return render_template(
+        "status.html", processed=processed_files, failed=failed_files
+    )
 
 
 @app.route("/delete", methods=["POST"])
@@ -81,13 +90,14 @@ def delete():
 
     return redirect(url_for("status"))
 
+
 @app.route("/enqueue", methods=["POST"])
 def enqueue():
     enqueue_files()
     flash("All files enqueued")
     return redirect(url_for("index"))
 
+
 if __name__ == "__main__":
     # app.run(debug=True)
     app.run(host="0.0.0.0", port=5000)
-
