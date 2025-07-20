@@ -1,4 +1,3 @@
-# processor.py
 import os
 import boto3
 import tempfile
@@ -59,8 +58,6 @@ def process_file(filename):
         print(f"[INFO] OCR complete for {filename}")
         print(f"[DEBUG] OCR Text:\n{text[:300]}...")
 
-        # delete or move original file if needed
-        # delete_from_s3(key)
         return True, text
 
     except Exception as e:
