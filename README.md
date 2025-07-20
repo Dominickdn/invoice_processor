@@ -53,7 +53,7 @@ Docker Compose is needed to orchestrate your multi-container services.
 
 ### 1. Clone the repo:
 
-git clone https://github.com/your-username/invoice-processor.git
+git clone https://github.com/Dominickdn/invoice_processor.git
 cd invoice-processor
 
 ### 2. Set up environment variables
