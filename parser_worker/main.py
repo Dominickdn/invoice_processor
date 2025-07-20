@@ -3,8 +3,6 @@ import json
 import pika
 import time
 from dotenv import load_dotenv
-from parser import extract_invoice_data
-from db.insert import insert_invoice_data
 from processor import process_file
 
 load_dotenv()
@@ -21,11 +19,11 @@ def callback(ch, method, properties, body):
         return
 
     try:
-        data = extract_invoice_data(text)
-        insert_invoice_data(data)
+        # Process the file parses and inserts data
         process_file(
-            filename
-        )  # Process the file after parsing just moves to different folder
+            filename,
+            text
+        )
         print(f"[INFO] Successfully parsed and inserted: {filename}")
     except Exception as e:
         print(f"[ERROR] Failed to parse or insert {filename}: {e}")
