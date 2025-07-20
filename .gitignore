@@ -1,0 +1,4 @@
+.env
+venv/
+ocr_worker/__pycache__/processor.cpython-312.pyc
+parser_worker/db/__pycache__/init_db.cpython-312.pyc

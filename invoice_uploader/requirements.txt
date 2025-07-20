@@ -1,0 +1,4 @@
+pika
+python-dotenv
+boto3
+Flask

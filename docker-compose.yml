@@ -1,0 +1,59 @@
+services:
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+
+  postgres:
+    image: postgres:15
+    container_name: database
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./parser_worker/db/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+  
+  minio:
+    image: minio/minio
+    container_name: minio
+    ports:
+      - "9000:9000"     # S3 API
+      - "9001:9001"     # Web UI
+    environment:
+      MINIO_ROOT_USER: ${MINIO_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio-data:/data
+
+  invoice_uploader:
+    build: ./invoice_uploader
+    env_file: .env
+    depends_on:
+      - rabbitmq
+      - minio
+    ports:
+      - "5000:5000"  # HostPort:ContainerPort
+
+  ocr_worker:
+    build: ./ocr_worker
+    env_file: .env
+    depends_on:
+      - rabbitmq
+      - minio
+
+  parser_worker:
+    build: ./parser_worker
+    env_file: .env
+    depends_on:
+      - rabbitmq
+      - postgres
+
+volumes:
+  minio-data:
+  postgres_data:

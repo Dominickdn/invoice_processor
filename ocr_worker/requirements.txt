@@ -1,0 +1,8 @@
+packaging
+pdf2image
+pika
+pillow
+psycopg2-binary
+pytesseract
+python-dotenv
+boto3

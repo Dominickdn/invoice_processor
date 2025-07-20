@@ -1,0 +1,32 @@
+graph TD
+    subgraph UI["User Interface"]
+        Uploader["Invoice Uploader (Flask Web UI)"]
+    end
+
+    subgraph Storage["MinIO (S3 Bucket)"]
+        MinIO["process/, processed/, failed/"]
+    end
+
+    subgraph Broker["RabbitMQ"]
+        ocr_queue["ocr_queue"]
+        parser_queue["parser_queue"]
+    end
+
+    subgraph Workers["Workers"]
+        OCR["OCR Worker"]
+        Parser["Parser Worker"]
+    end
+
+    subgraph DB["PostgreSQL"]
+        Postgres["Invoices Table"]
+    end
+
+    %% Flow
+    Uploader -->|Uploads file| MinIO
+    Uploader -->|Sends message| ocr_queue
+
+    ocr_queue --> OCR
+    OCR -->|Extracted text| parser_queue
+    parser_queue --> Parser
+    Parser -->|Parsed data| Postgres
+    Parser -->|Move to /processed or /failed| MinIO
