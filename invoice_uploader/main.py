@@ -1,9 +1,10 @@
-from flask import Flask, render_template, request, redirect, flash, url_for
 import boto3
 import os
-from ensure_bucket_exists import ensure_bucket_exists
-from dotenv import load_dotenv
 from enqueue_files import enqueue_files
+from ensure_bucket_exists import ensure_bucket_exists
+from flask import Flask, render_template, request, redirect, flash, url_for
+from db.query import get_invoices_with_items
+from dotenv import load_dotenv
 from werkzeug.utils import secure_filename
 
 load_dotenv()
@@ -99,6 +100,16 @@ def enqueue():
     enqueue_files()
     flash("All files enqueued")
     return redirect(url_for("index"))
+
+
+@app.route("/invoices")
+def invoices():
+    per_page = 20
+    page = int(request.args.get("page", 1))  # Default to page 1
+    offset = (page - 1) * per_page
+
+    all_invoices = get_invoices_with_items(limit=per_page, offset=offset)
+    return render_template("invoices.html", invoices=all_invoices, page=page)
 
 
 if __name__ == "__main__":
