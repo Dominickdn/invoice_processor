@@ -30,12 +30,12 @@
 
     <form method="POST" action="/enqueue" class="text-center p-6 rounded-md shadow-md space-y-4">
       <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-md w-full">
-        Enqueue All Files
+        Process All Files
       </button>
     </form>
 
     <div class="bg-gray-800 p-6 rounded-md shadow-md">
-      <h2 class="text-xl font-semibold mb-2">Files in MinIO</h2>
+      <h2 class="text-xl font-semibold mb-2">Files in MinIO to be processed</h2>
       {% if files %}
         <ul class="list-disc list-inside space-y-1">
           {% for file in files %}
