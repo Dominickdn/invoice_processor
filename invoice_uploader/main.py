@@ -1,9 +1,10 @@
 from flask import Flask, render_template, request, redirect, flash, url_for
 import boto3
 import os
+from ensure_bucket_exists import ensure_bucket_exists
 from dotenv import load_dotenv
-from werkzeug.utils import secure_filename
 from enqueue_files import enqueue_files
+from werkzeug.utils import secure_filename
 
 load_dotenv()
 app = Flask(__name__)
@@ -19,6 +20,8 @@ s3 = boto3.client(
 
 BUCKET = os.getenv("MINIO_BUCKET")
 UPLOAD_PREFIX = "process/"
+
+ensure_bucket_exists(BUCKET)
 
 
 @app.route("/")

@@ -3,7 +3,6 @@ import pika
 import os
 import boto3
 from dotenv import load_dotenv
-from botocore.exceptions import ClientError
 
 load_dotenv()
 
@@ -21,20 +20,6 @@ def enqueue_files():
 
     bucket_name = os.getenv("MINIO_BUCKET")
     prefix = "process/"  # S3 "folder"
-
-    # Check if bucket exists, create if not --- needs to be changed.
-    # Breaks flask app if bucket does not exist.
-    try:
-        s3.head_bucket(Bucket=bucket_name)
-        print(f"[INFO] Bucket '{bucket_name}' exists.")
-    except ClientError as e:
-        error_code = int(e.response["Error"]["Code"])
-        if error_code == 404:
-            print(f"[INFO] Bucket '{bucket_name}' not found. Creating...")
-            s3.create_bucket(Bucket=bucket_name)
-            print(f"[SUCCESS] Bucket '{bucket_name}' created.")
-        else:
-            raise e
 
     # List files in /process
     response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
