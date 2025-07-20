@@ -1,57 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Processing Status</title>
+  <title>Processing Status</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Processed & Failed Files</h1>
+<body class="bg-gray-900 text-gray-200 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-3xl space-y-6">
+
+    <h1 class="text-3xl font-bold text-center">Processed & Failed Files</h1>
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <ul>
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
+        <ul class="bg-gray-800 p-4 rounded-md text-green-400">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
         </ul>
       {% endif %}
     {% endwith %}
 
-    <h2>Processed</h2>
-    {% if processed %}
-        <ul>
-        {% for file in processed %}
-            <li>
-                {{ file }}
-                <form method="POST" action="/delete" style="display:inline;">
-                    <input type="hidden" name="folder" value="processed">
-                    <input type="hidden" name="filename" value="{{ file }}">
-                    <button type="submit">Delete</button>
-                </form>
+    <div class="bg-gray-800 p-6 rounded-md shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Processed Files</h2>
+      {% if processed %}
+        <ul class="space-y-2">
+          {% for file in processed %}
+            <li class="flex justify-between items-center bg-gray-700 p-2 rounded-md">
+              <span>{{ file }}</span>
+              <form method="POST" action="/delete" class="inline">
+                <input type="hidden" name="folder" value="processed">
+                <input type="hidden" name="filename" value="{{ file }}">
+              </form>
             </li>
-        {% endfor %}
+          {% endfor %}
         </ul>
-    {% else %}
-        <p>No processed files.</p>
-    {% endif %}
+      {% else %}
+        <p class="text-gray-400">No processed files.</p>
+      {% endif %}
+    </div>
 
-    <h2>Failed</h2>
-    {% if failed %}
-        <ul>
-        {% for file in failed %}
-            <li>
-                {{ file }}
-                <form method="POST" action="/delete" style="display:inline;">
-                    <input type="hidden" name="folder" value="failed">
-                    <input type="hidden" name="filename" value="{{ file }}">
-                    <button type="submit">Delete</button>
-                </form>
+    <div class="bg-gray-800 p-6 rounded-md shadow-md">
+      <h2 class="text-xl font-semibold mb-4">Failed Files</h2>
+      {% if failed %}
+        <ul class="space-y-2">
+          {% for file in failed %}
+            <li class="flex justify-between items-center bg-gray-700 p-2 rounded-md">
+              <span>{{ file }}</span>
+              <form method="POST" action="/delete" class="inline">
+                <input type="hidden" name="folder" value="failed">
+                <input type="hidden" name="filename" value="{{ file }}">
+                <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-md text-sm">
+                  Delete
+                </button>
+              </form>
             </li>
-        {% endfor %}
+          {% endfor %}
         </ul>
-    {% else %}
-        <p>No failed files.</p>
-    {% endif %}
+      {% else %}
+        <p class="text-gray-400">No failed files.</p>
+      {% endif %}
+    </div>
 
-    <p><a href="/">← Back to Upload Page</a></p>
+    <div class="text-center">
+      <a href="/" class="text-blue-400 hover:underline">← Back to Upload Page</a>
+    </div>
+
+  </div>
 </body>
 </html>

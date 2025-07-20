@@ -1,41 +1,56 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Invoice Uploader</title>
+  <title>Invoice Uploader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <h1>Upload Invoices to MinIO</h1>
+<body class="bg-gray-900 text-gray-200 min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-2xl space-y-6">
+
+    <h1 class="text-3xl font-bold text-center">Upload Invoices to MinIO</h1>
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
-        <ul>
-        {% for message in messages %}
-          <li>{{ message }}</li>
-        {% endfor %}
+        <ul class="bg-gray-800 p-4 rounded-md text-green-400">
+          {% for message in messages %}
+            <li>{{ message }}</li>
+          {% endfor %}
         </ul>
       {% endif %}
     {% endwith %}
 
-    <form method="POST" action="/upload" enctype="multipart/form-data">
-        <input type="file" name="files" multiple required>
-        <button type="submit">Upload Files</button>
+    <form method="POST" action="/upload" enctype="multipart/form-data" class="bg-gray-800 p-6 rounded-md shadow-md space-y-4">
+      <label class="block text-sm font-semibold">Select Invoices:</label>
+      <input type="file" name="files" multiple required class="w-full bg-gray-700 text-gray-100 p-2 rounded-md">
+      <button type="submit" class="bg-blue-600 hover:bg-blue-500 text-white font-semibold px-4 py-2 rounded-md w-full">
+        Upload Files
+      </button>
     </form>
 
-    <form method="POST" action="/enqueue" style="margin-top: 20px;">
-        <button type="submit">Enqueue All Files</button>
+    <form method="POST" action="/enqueue" class="text-center p-6 rounded-md shadow-md space-y-4">
+      <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-md w-full">
+        Enqueue All Files
+      </button>
     </form>
 
-    <h2>Files in MinIO</h2>
-    {% if files %}
-        <ul>
-        {% for file in files %}
+    <div class="bg-gray-800 p-6 rounded-md shadow-md">
+      <h2 class="text-xl font-semibold mb-2">Files in MinIO</h2>
+      {% if files %}
+        <ul class="list-disc list-inside space-y-1">
+          {% for file in files %}
             <li>{{ file }}</li>
-        {% endfor %}
+          {% endfor %}
         </ul>
-    {% else %}
-        <p>No files uploaded yet.</p>
-    {% endif %}
+      {% else %}
+        <p class="text-gray-400">No files uploaded yet.</p>
+      {% endif %}
+    </div>
 
-    <p><a href="/status">View Processed/Failed Files</a></p>
+    <p class="text-center">
+      <a href="/status" class="text-blue-400 hover:underline">View Processed/Failed Files</a>
+    </p>
+
+  </div>
 </body>
 </html>
