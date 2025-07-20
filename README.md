@@ -98,11 +98,15 @@ Logs are output to the console and container logs.
 
 --- 
 ## Testing Locally
-To manually enqueue files:
 
 Upload a file via the UI (http://localhost:5000)
+- Click choose files and select the files in the test_invoices folder supplied
+- Click Upload
+- Once files have been uploaded click the "Process All Files" button.
 
-Click Enqueue to start processing
+View Processed and Failed files (http://localhost:5000/status)
+
+View Captured Invoices from Database (http://localhost:5000/invoices)
 
 ---
 
