@@ -28,24 +28,16 @@
       </button>
     </form>
 
-    <form method="POST" action="/enqueue" class="text-center p-6 rounded-md shadow-md space-y-4">
+    <form method="POST" action="/enqueue" class="text-center p-6 rounded-md shadow-md space-y-4 bg-gray-800">
       <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-md w-full">
         Process All Files
       </button>
+      <div class="relative w-full bg-gray-700 rounded-full h-6 overflow-hidden">
+        <div id="progress-bar" class="absolute left-0 top-0 h-full bg-blue-500 rounded-full w-0 transition-all duration-200"></div>
+        <span id="progress-label" class="absolute inset-0 flex items-center justify-center text-sm font-semibold text-white">
+        </span>
+      </div>
     </form>
-
-    <div class="bg-gray-800 p-6 rounded-md shadow-md">
-      <h2 class="text-xl font-semibold mb-2">Files in MinIO to be processed</h2>
-      {% if files %}
-        <ul class="list-disc list-inside space-y-1">
-          {% for file in files %}
-            <li>{{ file }}</li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-gray-400">No files uploaded yet.</p>
-      {% endif %}
-    </div>
 
     <div class="text-center">
       <a href="/status" class="text-blue-400 hover:underline">View Processed/Failed Files</a>
@@ -55,5 +47,53 @@
     </div>
 
   </div>
+  <script>
+    let resetTimeout;
+
+    async function fetchProgress() {
+      const response = await fetch("/progress");
+      const data = await response.json();
+
+      const progressBar = document.getElementById("progress-bar");
+      const progressLabel = document.getElementById("progress-label");
+
+      if (data.total === 0) {
+        progressBar.style.width = "0%";
+        progressLabel.textContent = "";
+        return;
+      }
+
+      const completed = data.completed;
+      const failed = data.failed;
+      const total = data.total;
+      const processed = completed + failed;
+      const percent = Math.round((processed / total) * 100);
+
+      // Set width and label
+      progressBar.style.width = percent + "%";
+      progressLabel.textContent = `${processed} of ${total} processed`;
+
+      // When processing is complete
+      if (processed === total && total > 0) {
+        progressBar.classList.remove("bg-blue-500");
+        progressBar.classList.add("bg-green-500");
+
+        if (!resetTimeout) {
+          resetTimeout = setTimeout(() => {
+            progressBar.style.width = "0%";
+            progressBar.classList.remove("bg-green-500");
+            progressBar.classList.add("bg-blue-500");
+
+            progressLabel.textContent = "complete";
+            fetch("/reset-progress", { method: "POST" });
+
+            resetTimeout = null;
+          }, 1500);
+        }
+      }
+    }
+    setInterval(fetchProgress, 1000);
+    fetchProgress(); 
+  </script>
 </body>
 </html>

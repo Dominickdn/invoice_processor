@@ -1,27 +1,17 @@
 import json
 import pika
 import os
-import boto3
+from shared.redis_client import r
+from shared.s3_client import s3
 from dotenv import load_dotenv
 
 load_dotenv()
 
 
 def enqueue_files():
-
-    s3 = boto3.client(
-        "s3",
-        endpoint_url=os.getenv(
-            "MINIO_ENDPOINT"
-        ),  # e.g., http://localhost:9000
-        aws_access_key_id=os.getenv("MINIO_ACCESS_KEY"),
-        aws_secret_access_key=os.getenv("MINIO_SECRET_KEY"),
-    )
-
     bucket_name = os.getenv("MINIO_BUCKET")
-    prefix = "process/"  # S3 "folder"
+    prefix = "process/"
 
-    # List files in /process
     response = s3.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
     contents = response.get("Contents", [])
 
@@ -47,8 +37,10 @@ def enqueue_files():
 
     for obj in contents:
         key = obj["Key"]
-        if key.endswith("/"):  # skip folder keys
+        if key.endswith("/"):
             continue
+
+        r.set(key, "queued")
 
         message = json.dumps({"filename": key})
         channel.basic_publish(exchange="", routing_key=in_queue, body=message)

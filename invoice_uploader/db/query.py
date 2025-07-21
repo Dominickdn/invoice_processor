@@ -14,14 +14,17 @@ def get_invoices_with_items(limit=20, offset=0):
         password=os.getenv("POSTGRES_PASSWORD"),
     )
     cur = conn.cursor()
-    cur.execute("""
+    cur.execute(
+        """
         SELECT i.id, i.invoice_number, i.invoice_date, i.vendor,
                i.total_amount_due, it.item, it.qty, it.unit_price
         FROM invoices i
         LEFT JOIN invoice_items it ON i.id = it.invoice_id
         ORDER BY i.invoice_date DESC
         LIMIT %s OFFSET %s;
-    """, (limit, offset))
+    """,
+        (limit, offset),
+    )
 
     rows = cur.fetchall()
     cur.close()
@@ -37,12 +40,10 @@ def get_invoices_with_items(limit=20, offset=0):
                 "invoice_date": date,
                 "vendor": vendor,
                 "total_amount_due": total,
-                "items": []
+                "items": [],
             }
         if item:
-            invoices[inv_id]["items"].append({
-                "item": item,
-                "qty": qty,
-                "unit_price": price
-            })
+            invoices[inv_id]["items"].append(
+                {"item": item, "qty": qty, "unit_price": price}
+            )
     return list(invoices.values())

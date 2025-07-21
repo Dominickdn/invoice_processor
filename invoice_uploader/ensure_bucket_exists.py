@@ -1,25 +1,12 @@
-import boto3
 from botocore.exceptions import ClientError
-import os
 from dotenv import load_dotenv
+from shared.s3_client import s3
 
 load_dotenv()
 
 
 def ensure_bucket_exists(bucket_name):
-    """
-    Checks if the specified S3 bucket exists. If not, creates it.
-
-    Args:
-        bucket_name (str): The name of the bucket to check or create.
-    """
-    s3 = boto3.client(
-        "s3",
-        endpoint_url=os.getenv("MINIO_ENDPOINT"),
-        aws_access_key_id=os.getenv("MINIO_ACCESS_KEY"),
-        aws_secret_access_key=os.getenv("MINIO_SECRET_KEY"),
-    )
-
+    """Creates s3 bucket if it does not exist."""
     try:
         s3.head_bucket(Bucket=bucket_name)
         print(f"[INFO] Bucket '{bucket_name}' already exists.")

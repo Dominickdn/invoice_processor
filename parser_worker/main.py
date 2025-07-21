@@ -20,10 +20,7 @@ def callback(ch, method, properties, body):
 
     try:
         # Process the file parses and inserts data
-        process_file(
-            filename,
-            text
-        )
+        process_file(filename, text)
         print(f"[INFO] Successfully parsed and inserted: {filename}")
     except Exception as e:
         print(f"[ERROR] Failed to parse or insert {filename}: {e}")

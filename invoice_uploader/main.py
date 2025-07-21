@@ -1,23 +1,17 @@
-import boto3
 import os
 from enqueue_files import enqueue_files
 from ensure_bucket_exists import ensure_bucket_exists
 from flask import Flask, render_template, request, redirect, flash, url_for
 from db.query import get_invoices_with_items
 from dotenv import load_dotenv
+from shared.redis_client import r
+from shared.s3_client import s3
 from werkzeug.utils import secure_filename
 
 load_dotenv()
 app = Flask(__name__)
 app.secret_key = "supersecret"
 
-# S3 config
-s3 = boto3.client(
-    "s3",
-    endpoint_url=os.getenv("MINIO_ENDPOINT"),
-    aws_access_key_id=os.getenv("MINIO_ACCESS_KEY"),
-    aws_secret_access_key=os.getenv("MINIO_SECRET_KEY"),
-)
 
 BUCKET = os.getenv("MINIO_BUCKET")
 UPLOAD_PREFIX = "process/"
@@ -55,6 +49,33 @@ def upload():
         s3.upload_fileobj(file, BUCKET, f"{UPLOAD_PREFIX}{filename}")
         flash(f"Uploaded: {filename}")
     return redirect(url_for("index"))
+
+
+@app.route("/progress")
+def progress():
+    keys = r.keys("process/*")
+    total = len(keys)
+    status_counts = {"queued": 0, "processing": 0, "completed": 0, "failed": 0}
+
+    for key in keys:
+        status = r.get(key)
+        if status in status_counts:
+            status_counts[status] += 1
+
+    return {
+        "total": total,
+        "queued": status_counts["queued"],
+        "processing": status_counts["processing"],
+        "completed": status_counts["completed"],
+        "failed": status_counts["failed"],
+    }
+
+
+@app.route("/reset-progress", methods=["POST"])
+def reset_progress():
+    for key in r.scan_iter("process/*"):
+        r.delete(key)
+    return "", 204
 
 
 @app.route("/status")

@@ -1,20 +1,14 @@
 import os
-import boto3
 from botocore.exceptions import ClientError
 from io import BytesIO
 from dotenv import load_dotenv
 from parser import extract_invoice_data
 from db.insert import insert_invoice_data
+from shared.redis_client import r
+from shared.s3_client import s3
 
 load_dotenv()
 
-# S3 client
-s3 = boto3.client(
-    "s3",
-    endpoint_url=os.getenv("MINIO_ENDPOINT"),
-    aws_access_key_id=os.getenv("MINIO_ACCESS_KEY"),
-    aws_secret_access_key=os.getenv("MINIO_SECRET_KEY"),
-)
 BUCKET = os.getenv("MINIO_BUCKET")
 
 
@@ -44,6 +38,7 @@ def process_file(filename, text):
         data = extract_invoice_data(text)
     except Exception as e:
         print(f"[ERROR] Failed to parse invoice from {filename}: {e}")
+        r.set(key, "failed")
         body.seek(0)
         upload_to_s3(body, "failed/", filename)
         delete_from_s3(key)
@@ -57,6 +52,7 @@ def process_file(filename, text):
 
     except Exception as e:
         print(f"[ERROR] DB insert failed for {filename}: {e}")
+        r.set(key, "failed")
         body.seek(0)
         upload_to_s3(body, "failed/", filename)
         delete_from_s3(key)
@@ -64,6 +60,8 @@ def process_file(filename, text):
 
     # If everything is successful, move to processed folder
     print(f"[INFO] Successfully inserted and moving {filename} to processed/")
+    # Reddis status updated
+    r.set(key, "completed")
     body.seek(0)
     upload_to_s3(body, "processed/", filename)
     delete_from_s3(key)

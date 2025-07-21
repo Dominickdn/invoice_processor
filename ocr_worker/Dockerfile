@@ -18,5 +18,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY main.py .
 COPY processor.py .
+COPY shared/ ./shared
 
 CMD ["python", "-u", "main.py"]

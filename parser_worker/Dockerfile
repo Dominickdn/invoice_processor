@@ -13,6 +13,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY main.py .              
 COPY processor.py .          
 COPY parser.py .     
-COPY db/ ./db      
+COPY db/ ./db
+COPY shared/ ./shared
 
 CMD ["python", "-u", "main.py"]

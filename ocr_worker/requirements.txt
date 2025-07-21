@@ -6,3 +6,4 @@ psycopg2-binary
 pytesseract
 python-dotenv
 boto3
+redis
