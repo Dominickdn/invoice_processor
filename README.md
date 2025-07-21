@@ -26,6 +26,7 @@ Docker Compose is needed to orchestrate your multi-container services.
 - Converts PDFs to images using `poppler` if needed.
 - Runs Tesseract OCR on images to extract text.
 - Publishes extracted text to another queue for parsing.
+- Reports status to Redis.
 
 ### 3. **Parser Worker**
 - Listens to the parser queue.
@@ -33,19 +34,21 @@ Docker Compose is needed to orchestrate your multi-container services.
 - Inserts structured data into a PostgreSQL database.
 - Moves the processed file from `process/` to `processed/`.
 - On failure, the file is moved to `failed/`.
+- Updates status in Redis.
 
 ---
 
 ## Stack
 
-| Component     | Technology        |
-|---------------|-------------------|
-| File Storage  | MinIO (S3 API)    |
-| Messaging     | RabbitMQ          |
-| OCR Engine    | Tesseract + Poppler |
-| Web UI        | Flask             |
-| Database      | PostgreSQL        |
-| Containerization | Docker Compose |
+| Component         | Technology          |
+|-------------------|---------------------|
+| File Storage      | MinIO (S3 API)      |
+| Messaging         | RabbitMQ            |
+| OCR Engine        | Tesseract + Poppler |
+| Web UI            | Flask               |
+| Progress Tracking | Redis               |
+| Database          | PostgreSQL          |
+| Containerization  | Docker Compose      |
 
 ---
 
@@ -90,6 +93,7 @@ View Captured Invoices from Database (http://localhost:5000/invoices)
 | RabbitMQ UI      | [http://localhost:15672](http://localhost:15672) (guest/guest) |
 | MinIO Console    | [http://localhost:9001](http://localhost:9001)                 |
 | PostgreSQL       | localhost:5435 (via client)                                    |
+| Redis            | localhost:6379 (via client)                                    |
 ---
 
 ## Message Queues
