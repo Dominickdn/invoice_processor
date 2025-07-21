@@ -69,6 +69,19 @@ docker-compose up -d
 
 ---
 
+## Testing Locally
+
+Upload a file via the UI (http://localhost:5000)
+- Click choose files and select the files in the test_invoices folder supplied
+- Click Upload
+- Once files have been uploaded click the "Process All Files" button.
+
+View Processed and Failed files (http://localhost:5000/status)
+
+View Captured Invoices from Database (http://localhost:5000/invoices)
+
+---
+
 ## Access
 
 | Service          | URL                                                            |
@@ -97,18 +110,6 @@ Any file that fails at OCR or parsing stage is moved to failed/.
 Logs are output to the console and container logs.
 
 --- 
-## Testing Locally
-
-Upload a file via the UI (http://localhost:5000)
-- Click choose files and select the files in the test_invoices folder supplied
-- Click Upload
-- Once files have been uploaded click the "Process All Files" button.
-
-View Processed and Failed files (http://localhost:5000/status)
-
-View Captured Invoices from Database (http://localhost:5000/invoices)
-
----
 
 ## Resetting the DB
 To reset the PostgreSQL database run:
