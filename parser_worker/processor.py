@@ -60,7 +60,7 @@ def process_file(filename, text):
 
     # If everything is successful, move to processed folder
     print(f"[INFO] Successfully inserted and moving {filename} to processed/")
-    # Reddis status updated
+    # Redis status updated
     r.set(key, "completed")
     body.seek(0)
     upload_to_s3(body, "processed/", filename)
