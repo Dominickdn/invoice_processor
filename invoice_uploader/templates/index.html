@@ -29,7 +29,7 @@
     </form>
 
     <form method="POST" action="/enqueue" class="text-center p-6 rounded-md shadow-md space-y-4 bg-gray-800">
-      <button type="submit" class="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-md w-full">
+      <button id="enqueue-button" type="submit" disabled class="bg-purple-600 hover:bg-purple-500 text-white font-semibold px-4 py-2 rounded-md w-full opacity-50 cursor-not-allowed">
         Process All Files
       </button>
       <div class="relative w-full bg-gray-700 rounded-full h-6 overflow-hidden">
@@ -56,10 +56,13 @@
 
       const progressBar = document.getElementById("progress-bar");
       const progressLabel = document.getElementById("progress-label");
+      const enqueueButton = document.getElementById("enqueue-button");
 
       if (data.total === 0) {
         progressBar.style.width = "0%";
         progressLabel.textContent = "";
+        enqueueButton.disabled = false;
+        enqueueButton.classList.remove("opacity-50", "cursor-not-allowed");
         return;
       }
 
@@ -87,8 +90,11 @@
             progressLabel.textContent = "complete";
             fetch("/reset-progress", { method: "POST" });
 
+            enqueueButton.disabled = false;
+            enqueueButton.classList.remove("opacity-50", "cursor-not-allowed");
+
             resetTimeout = null;
-          }, 1500);
+          }, 1200);
         }
       }
     }
