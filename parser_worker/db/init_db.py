@@ -2,19 +2,14 @@ import psycopg2
 import os
 from dotenv import load_dotenv
 from pathlib import Path
+from utils.db_connection import get_db_connection
 
 load_dotenv()
 
 
 def init_db():
     try:
-        conn = psycopg2.connect(
-            host=os.getenv("POSTGRES_HOST"),
-            port=os.getenv("POSTGRES_PORT"),
-            database=os.getenv("POSTGRES_DB"),
-            user=os.getenv("POSTGRES_USER"),
-            password=os.getenv("POSTGRES_PASSWORD"),
-        )
+        conn = get_db_connection()
         cur = conn.cursor()
 
         schema_path = Path(__file__).parent / "schema.sql"

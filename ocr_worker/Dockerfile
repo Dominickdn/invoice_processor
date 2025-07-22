@@ -13,11 +13,12 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+COPY ocr_worker/requirements.txt .
 
-COPY main.py .
-COPY processor.py .
-COPY shared/ ./shared
+COPY ocr_worker/ .
+
+COPY utils/ ./utils/
+
+RUN pip install --no-cache-dir -r requirements.txt
 
 CMD ["python", "-u", "main.py"]

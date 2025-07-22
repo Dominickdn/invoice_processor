@@ -1,9 +1,11 @@
 import json
 import pika
 import os
-from shared.redis_client import r
-from shared.s3_client import s3
+from utils.redis_client import r
+from utils.s3_client import s3
+from utils.rabbitmq_connection import get_rabbitmq_connection
 from dotenv import load_dotenv
+
 
 load_dotenv()
 
@@ -19,15 +21,7 @@ def enqueue_files():
         print(f"[WARNING] No files found in s3://{bucket_name}/{prefix}")
         return
 
-    credentials = pika.PlainCredentials(
-        os.getenv("RABBITMQ_USER"), os.getenv("RABBITMQ_PASS")
-    )
-    parameters = pika.ConnectionParameters(
-        host=os.getenv("RABBITMQ_HOST"),
-        port=os.getenv("RABBITMQ_PORT"),
-        credentials=credentials,
-    )
-    connection = pika.BlockingConnection(parameters)
+    connection = get_rabbitmq_connection()
     channel = connection.channel()
     in_queue = os.getenv("RABBITMQ_QUEUE_INVOICES")
     out_queue = os.getenv("RABBITMQ_QUEUE_OCR_RESULTS")

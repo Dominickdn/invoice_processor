@@ -4,6 +4,7 @@ import time
 import pika
 from dotenv import load_dotenv
 from processor import process_file
+from utils.rabbitmq_connection import get_rabbitmq_connection
 
 load_dotenv()
 
@@ -35,15 +36,6 @@ def callback(ch, method, properties, body):
 
 
 def main():
-    credentials = pika.PlainCredentials(
-        os.getenv("RABBITMQ_USER"), os.getenv("RABBITMQ_PASS")
-    )
-    params = pika.ConnectionParameters(
-        host=os.getenv("RABBITMQ_HOST"),
-        port=int(os.getenv("RABBITMQ_PORT")),
-        credentials=credentials,
-    )
-
     # Retry connection loop
     connection = None
     for attempt in range(1, 6):
@@ -52,7 +44,7 @@ def main():
                 "[INFO] Attempting to connect "
                 f"to RabbitMQ (try {attempt}/5)..."
             )
-            connection = pika.BlockingConnection(params)
+            connection = get_rabbitmq_connection()
             print("[INFO] Connected to RabbitMQ.")
             break
         except pika.exceptions.AMQPConnectionError as e:

@@ -38,7 +38,9 @@ services:
       - "6379:6379"
 
   invoice_uploader:
-    build: ./invoice_uploader
+    build:
+      context: .
+      dockerfile: invoice_uploader/Dockerfile
     env_file: .env
     depends_on:
       - postgres
@@ -46,10 +48,12 @@ services:
       - minio
       - redis
     ports:
-      - "5000:5000"  # HostPort:ContainerPort
+      - "5000:5000"
 
   ocr_worker:
-    build: ./ocr_worker
+    build: 
+      context: .
+      dockerfile: ocr_worker/Dockerfile
     env_file: .env
     depends_on:
       - rabbitmq
@@ -57,7 +61,9 @@ services:
       - redis
 
   parser_worker:
-    build: ./parser_worker
+    build:
+      context: .
+      dockerfile: parser_worker/Dockerfile
     env_file: .env
     depends_on:
       - rabbitmq

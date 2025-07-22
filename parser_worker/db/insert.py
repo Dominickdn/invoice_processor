@@ -1,6 +1,7 @@
 import psycopg2
 import os
 from dotenv import load_dotenv
+from utils.db_connection import get_db_connection
 
 load_dotenv()
 
@@ -18,13 +19,7 @@ def insert_invoice_data(data):
     """
     print(f"[DEBUG] Inserting invoice data: {data}")
     try:
-        conn = psycopg2.connect(
-            host=os.getenv("POSTGRES_HOST"),
-            port=os.getenv("POSTGRES_PORT"),
-            database=os.getenv("POSTGRES_DB"),
-            user=os.getenv("POSTGRES_USER"),
-            password=os.getenv("POSTGRES_PASSWORD"),
-        )
+        conn = get_db_connection()
         cur = conn.cursor()
 
         # Insert into invoices table

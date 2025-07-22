@@ -6,14 +6,13 @@ RUN apt-get update && apt-get install -y \
     libpq-dev gcc \
  && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY parser_worker/requirements.txt .
+
+COPY parser_worker/ .
+
+COPY utils/ ./utils/
 
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY main.py .              
-COPY processor.py .          
-COPY parser.py .     
-COPY db/ ./db
-COPY shared/ ./shared
 
 CMD ["python", "-u", "main.py"]

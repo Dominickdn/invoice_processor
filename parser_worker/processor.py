@@ -4,8 +4,8 @@ from io import BytesIO
 from dotenv import load_dotenv
 from parser import extract_invoice_data
 from db.insert import insert_invoice_data
-from shared.redis_client import r
-from shared.s3_client import s3
+from utils.redis_client import r
+from utils.s3_client import s3
 
 load_dotenv()
 

@@ -4,6 +4,7 @@ import pika
 import time
 from dotenv import load_dotenv
 from processor import process_file
+from utils.rabbitmq_connection import get_rabbitmq_connection
 
 load_dotenv()
 
@@ -29,14 +30,6 @@ def callback(ch, method, properties, body):
 
 
 def main():
-    credentials = pika.PlainCredentials(
-        os.getenv("RABBITMQ_USER"), os.getenv("RABBITMQ_PASS")
-    )
-    params = pika.ConnectionParameters(
-        host=os.getenv("RABBITMQ_HOST"),
-        port=int(os.getenv("RABBITMQ_PORT")),
-        credentials=credentials,
-    )
     connection = None
     for attempt in range(1, 10):
         try:
@@ -44,7 +37,7 @@ def main():
                 "[INFO] Attempting to connect "
                 f"to RabbitMQ (try {attempt}/9)..."
             )
-            connection = pika.BlockingConnection(params)
+            connection = get_rabbitmq_connection()
             print("[INFO] Connected to RabbitMQ.")
             break
         except pika.exceptions.AMQPConnectionError as e:
@@ -57,8 +50,7 @@ def main():
         )
         return
 
-    conn = pika.BlockingConnection(params)
-    channel = conn.channel()
+    channel = connection.channel()
     queue = os.getenv("RABBITMQ_QUEUE_OCR_RESULTS")
     channel.queue_declare(queue=queue)
 

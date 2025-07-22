@@ -4,8 +4,8 @@ from ensure_bucket_exists import ensure_bucket_exists
 from flask import Flask, render_template, request, redirect, flash, url_for
 from db.query import get_invoices_with_items
 from dotenv import load_dotenv
-from shared.redis_client import r
-from shared.s3_client import s3
+from utils.redis_client import r
+from utils.s3_client import s3
 from werkzeug.utils import secure_filename
 
 load_dotenv()

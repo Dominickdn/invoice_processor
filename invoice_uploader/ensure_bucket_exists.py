@@ -1,6 +1,6 @@
 from botocore.exceptions import ClientError
 from dotenv import load_dotenv
-from shared.s3_client import s3
+from utils.s3_client import s3
 
 load_dotenv()
 
