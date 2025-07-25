@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <title>Captured Invoices</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .transition-max-height {
+            transition-property: max-height;
+        }
+    </style>
 </head>
 <body class="bg-gray-900 text-gray-200 p-6 min-h-screen">
     <div class="max-w-3xl mx-auto space-y-6 mt-10">
@@ -11,34 +16,61 @@
 
         {% if invoices %}
             {% for invoice in invoices %}
-                <div class="bg-gray-800 rounded-lg p-4 mb-4 shadow">
-                    <p><strong>Invoice Number:</strong> {{ invoice.invoice_number }}</p>
-                    <p><strong>Date:</strong> {{ invoice.invoice_date }}</p>
-                    <p><strong>Vendor:</strong> {{ invoice.vendor }}</p>
-                    <p><strong>Total:</strong> {{ invoice.total_amount_due }}</p>
-
-                    {% if invoice["items"] %}
-                        <h3 class="mt-3 font-semibold">Items:</h3>
-                        <ul class="list-disc ml-6 text-sm">
-                            {% for item in invoice["items"] %}
-                                <li>{{ item.item }} — Qty: {{ item.qty }}, Unit Price: {{ item.unit_price }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-sm text-gray-400">No items found.</p>
-                    {% endif %}
+            <div class="bg-gray-800 rounded-lg p-4 mb-4 shadow">
+                <!-- Always visible: Invoice Number and Date -->
+                <button 
+                class="w-full text-left flex justify-between items-center text-gray-200 focus:outline-none"
+                aria-expanded="false"
+                aria-controls="details-{{ loop.index }}"
+                id="toggle-btn-{{ loop.index }}"
+                type="button"
+                >
+                <div>
+                    <strong>Invoice Number:</strong> {{ invoice.invoice_number }}<br />
+                    <strong>Date:</strong> {{ invoice.invoice_date }}
                 </div>
-            {% endfor %}
+                <div class="flex items-center space-x-2 transform transition-transform duration-300 text-blue-400  focus:outline-none">
+                    <span id="icon-{{ loop.index }}" class="hover:underline">▼</span>
+                    <span id="toggle-text-{{ loop.index }}" class="text-sm select-none ">Show</span>
+                </div>
+                </button>
+                <!-- Collapsible details, initially hidden -->
+                <div 
+                id="details-{{ loop.index }}" 
+                class="overflow-hidden max-h-0 transition-max-height duration-500 ease-in-out"
+                aria-labelledby="toggle-btn-{{ loop.index }}"
+                style="max-height: 0;"
+                >
+                <p class="mt-3"><strong>Vendor:</strong> {{ invoice.vendor }}</p>
+                <p><strong>Total:</strong> {{ invoice.total_amount_due }}</p>
 
-            <!-- Pagination -->
-            <div class="mt-6 flex justify-between">
-                {% if page > 1 %}
-                    <a href="{{ url_for('invoices', page=page-1) }}" class="text-blue-400 hover:underline">← Previous</a>
+                {% if invoice["items"] %}
+                    <h3 class="mt-3 font-semibold">Items:</h3>
+                    <ul class="list-disc ml-6 text-sm">
+                    {% for item in invoice["items"] %}
+                        <li>{{ item.item }} — Qty: {{ item.qty }}, Unit Price: {{ item.unit_price }}</li>
+                    {% endfor %}
+                    </ul>
                 {% else %}
-                    <span></span>
+                    <p class="text-sm text-gray-400">No items found.</p>
                 {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+            <!-- Pagination -->
+            <div class="mt-6 flex justify-center items-center space-x-6 mr-7">
+                {% if page > 1 %}
+                    <a href="{{ url_for('invoices', page=page-1) }}" class="text-blue-400 hover:underline ">← Previous</a>
+                {% else %}
+                    <span class="text-gray-500">← Previous</span>
+                {% endif %}
+                    <div class="text-sm text-gray-300 mx-auto flex items-center justify-center">
+                        <span>{{ page }}</span>
+                    </div>
                 {% if has_next %}
-                    <a href="{{ url_for('invoices', page=page+1) }}" class="text-blue-400 hover:underline ml-auto">Next →</a>
+                    <a href="{{ url_for('invoices', page=page+1) }}" class="text-blue-400 hover:underline">Next →</a>
+                {% else %}
+                    <span class="text-gray-500">Next →</span>
                 {% endif %}
             </div>
         {% else %}
@@ -52,5 +84,38 @@
             <a href="/status" class="text-blue-400 hover:underline">View Processed/Failed Files</a>
         </div>
     </div>
+    <script>
+        document.querySelectorAll('button[aria-expanded]').forEach(button => {
+            button.addEventListener('click', () => {
+            const expanded = button.getAttribute('aria-expanded') === 'true';
+            const details = document.getElementById(button.getAttribute('aria-controls'));
+            const idx = button.id.split('-')[2];
+            const icon = document.getElementById('icon-' + idx);
+            const toggleText = document.getElementById('toggle-text-' + idx);
+
+            if (!details) return;
+
+            if (expanded) {
+                // Collapse
+                details.style.maxHeight = '0';
+                button.setAttribute('aria-expanded', 'false');
+                icon.style.transform = 'rotate(0deg)';
+                toggleText.textContent = 'Show';
+            } else {
+                // Expand
+                details.style.maxHeight = details.scrollHeight + 'px';
+                button.setAttribute('aria-expanded', 'true');
+                icon.style.transform = 'rotate(180deg)';
+                toggleText.textContent = 'Hide';
+            }
+            });
+
+            // Collapse all on page load
+            const details = document.getElementById(button.getAttribute('aria-controls'));
+            if(details){
+            details.style.maxHeight = '0';
+            }
+        });
+    </script>
 </body>
 </html>

@@ -27,7 +27,7 @@ def index():
     for obj in objects.get("Contents", []):
         key = obj["Key"]
         if not key.endswith("/"):
-            files.append(key.replace(UPLOAD_PREFIX, ""))  # strip prefix
+            files.append(key.replace(UPLOAD_PREFIX, ""))
     return render_template("index.html", files=files)
 
 
@@ -125,14 +125,23 @@ def enqueue():
 
 @app.route("/invoices")
 def invoices():
-    per_page = 20
-    page = int(request.args.get("page", 1))  # Default to page 1
+    per_page = 10
+    page = int(request.args.get("page", 1))
     offset = (page - 1) * per_page
 
-    all_invoices = get_invoices_with_items(limit=per_page, offset=offset)
-    return render_template("invoices.html", invoices=all_invoices, page=page)
+    invoices_with_items = get_invoices_with_items(
+        limit=per_page + 1, offset=offset
+    )
+
+    has_next = len(invoices_with_items) > per_page
+    invoices_to_display = invoices_with_items[:per_page]
+    return render_template(
+        "invoices.html",
+        invoices=invoices_to_display,
+        page=page,
+        has_next=has_next,
+    )
 
 
 if __name__ == "__main__":
-    # app.run(debug=True)
     app.run(host="0.0.0.0", port=5000)

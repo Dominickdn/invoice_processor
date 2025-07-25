@@ -1,5 +1,4 @@
 import json
-import pika
 import os
 from utils.redis_client import r
 from utils.s3_client import s3

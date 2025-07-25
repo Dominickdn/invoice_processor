@@ -4,6 +4,22 @@
   <title>Invoice Uploader</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1f2937; 
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #4b5563; 
+      border-radius: 4px;
+    }
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: #4b5563 #1f2937;
+    }
+  </style>
 </head>
 <body class="bg-gray-900 text-gray-200 min-h-screen flex items-center justify-center p-4">
   <div class="w-full max-w-2xl space-y-6">
@@ -12,11 +28,13 @@
 
     {% with messages = get_flashed_messages() %}
       {% if messages %}
+      <div class="max-h-24 overflow-y-auto custom-scrollbar pr-1">
         <ul class="bg-gray-800 p-4 rounded-md text-green-400">
           {% for message in messages %}
-            <li>{{ message }}</li>
+            <li class="pb-1">{{ message }}</li>
           {% endfor %}
         </ul>
+      </div>
       {% endif %}
     {% endwith %}
 

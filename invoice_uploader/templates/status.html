@@ -4,12 +4,26 @@
   <title>Processing Status</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #1f2937; 
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background-color: #4b5563; 
+      border-radius: 4px;
+    }
+    .custom-scrollbar {
+      scrollbar-width: thin;
+      scrollbar-color: #4b5563 #1f2937;
+    }
+  </style>
 </head>
 <body class="bg-gray-900 text-gray-200 min-h-screen flex items-center justify-center p-4">
-  <div class="w-full max-w-3xl space-y-6">
-
+  <div class="w-full max-w-3xl space-y-8">
     <h1 class="text-3xl font-bold text-center">Processed & Failed Files</h1>
-
     {% with messages = get_flashed_messages() %}
       {% if messages %}
         <ul class="bg-gray-800 p-4 rounded-md text-green-400">
@@ -19,55 +33,58 @@
         </ul>
       {% endif %}
     {% endwith %}
-
+    <!-- Processed Files Section -->
     <div class="bg-gray-800 p-6 rounded-md shadow-md">
       <h2 class="text-xl font-semibold mb-4">Processed Files</h2>
-      {% if processed %}
-        <ul class="space-y-2">
-          {% for file in processed %}
-            <li class="flex justify-between items-center bg-gray-700 p-2 rounded-md">
-              <span>{{ file }}</span>
-              <form method="POST" action="/delete" class="inline">
-                <input type="hidden" name="folder" value="processed">
-                <input type="hidden" name="filename" value="{{ file }}">
-              </form>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-gray-400">No processed files.</p>
-      {% endif %}
+      <div class="max-h-40 overflow-y-auto custom-scrollbar pr-1">
+        {% if processed %}
+          <ul class="space-y-2">
+            {% for file in processed %}
+              <li class="flex justify-between items-center bg-gray-700 p-2 rounded-md">
+                <span>{{ file }}</span>
+                <form method="POST" action="/delete" class="inline">
+                  <input type="hidden" name="folder" value="processed">
+                  <input type="hidden" name="filename" value="{{ file }}">
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-400">No processed files.</p>
+        {% endif %}
+      </div>
     </div>
-
+    <!-- Failed Files Section -->
     <div class="bg-gray-800 p-6 rounded-md shadow-md">
       <h2 class="text-xl font-semibold mb-4">Failed Files</h2>
-      {% if failed %}
-        <ul class="space-y-2">
-          {% for file in failed %}
-            <li class="flex justify-between items-center bg-gray-700 p-2 rounded-md">
-              <span>{{ file }}</span>
-              <form method="POST" action="/delete" class="inline">
-                <input type="hidden" name="folder" value="failed">
-                <input type="hidden" name="filename" value="{{ file }}">
-                <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-md text-sm">
-                  Delete
-                </button>
-              </form>
-            </li>
-          {% endfor %}
-        </ul>
-      {% else %}
-        <p class="text-gray-400">No failed files.</p>
-      {% endif %}
+      <div class="max-h-40 overflow-y-auto custom-scrollbar pr-1">
+        {% if failed %}
+          <ul class="space-y-2">
+            {% for file in failed %}
+              <li class="flex justify-between items-center bg-gray-700 p-2 rounded-md">
+                <span>{{ file }}</span>
+                <form method="POST" action="/delete" class="inline">
+                  <input type="hidden" name="folder" value="failed">
+                  <input type="hidden" name="filename" value="{{ file }}">
+                  <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-md text-sm">
+                    Delete
+                  </button>
+                </form>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p class="text-gray-400">No failed files.</p>
+        {% endif %}
+      </div>
     </div>
-
-    <div class="text-center">
-      <a href="/" class="text-blue-400 hover:underline">Upload Page</a>
+    <!-- Navigation Links -->
+    <div class="mt-6 flex justify-center space-x-6">
+      <a href="/" class="text-blue-400 hover:underline">Upload Page</a><br>
     </div>
-    <div class="text-center">
+    <div class="mt-6 flex justify-center space-x-6">
       <a href="/invoices" class="text-blue-400 hover:underline">View Captured Invoices</a>
     </div>
-
   </div>
 </body>
 </html>
