@@ -1,5 +1,3 @@
-import psycopg2
-import os
 from dotenv import load_dotenv
 from pathlib import Path
 from utils.db_connection import get_db_connection

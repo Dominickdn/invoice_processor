@@ -1,6 +1,7 @@
 import pika
 import os
 
+
 def get_rabbitmq_connection():
     credentials = pika.PlainCredentials(
         os.getenv("RABBITMQ_USER"), os.getenv("RABBITMQ_PASS")
