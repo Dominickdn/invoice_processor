@@ -27,7 +27,15 @@
                 >
                 <div>
                     <strong>Invoice Number:</strong> {{ invoice.invoice_number }}<br />
-                    <strong>Date:</strong> {{ invoice.invoice_date }}
+                    <strong>Date:</strong> {{ invoice.invoice_date }}<br />
+                    <strong>File:</strong>
+                    <a 
+                        href="{{ url_for('download_file', filename=invoice.file_name) }}" 
+                        target="_blank"
+                        class="text-blue-600 hover:text-blue-800 font-medium underline underline-offset-2 transition-colors"
+                    >
+                        {{ invoice.file_name }}
+                    </a>
                 </div>
                 <div class="flex items-center space-x-2 transform transition-transform duration-300 text-blue-400  focus:outline-none">
                     <span id="icon-{{ loop.index }}" class="hover:underline">▼</span>
@@ -81,7 +89,7 @@
             <a href="/" class="text-blue-400 hover:underline">Upload Page</a>
         </div>
         <div class="mt-6 flex justify-center space-x-6">
-            <a href="/status" class="text-blue-400 hover:underline">View Processed/Failed Files</a>
+            <a href="/status" class="text-blue-400 hover:underline">View Uploaded/Failed Files</a>
         </div>
     </div>
     <script>

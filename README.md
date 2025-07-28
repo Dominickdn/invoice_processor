@@ -74,16 +74,50 @@ docker-compose up -d
 
 ## Testing Locally
 
-Upload a file via the UI (http://localhost:5000)
-- Click choose files and select the files in the test_invoices folder supplied
-- Click Upload
-- Once files have been uploaded click the "Process All Files" button.
-
-View Processed and Failed files (http://localhost:5000/status)
-
-View Captured Invoices from Database (http://localhost:5000/invoices)
+### 1. Upload Test Invoices
+- Open your browser and go to: [http://localhost:5000](http://localhost:5000)
+- Click **"Choose Files"** and select files from the `test_invoices` folder that is provided in the main project directory.
+- Click the **"Upload"** button.
+- You can confirm your uploaded files by visiting: [http://localhost:5000/status](http://localhost:5000/status)
 
 ---
+
+### 2. Process All Files
+- After uploading, click the **"Process All Files"** button on the homepage.
+- The system will extract data, save it to the database, and move files to their respective folders (`processed/` or `failed/`).
+
+---
+
+### 3. Check Processing Results
+- Visit: [http://localhost:5000/status](http://localhost:5000/status)
+- All Failed files are moved to failed.
+- There should be no more uploaded files, these are all processed and moved to the invoices page below.
+
+---
+
+### 4. View Invoices in the Database
+- Visit: [http://localhost:5000/invoices](http://localhost:5000/invoices)
+- See all successfully processed invoices.
+- Download links are available for each associated file.
+
+### Optional: 5. Create Your Own Invoices
+- You can test the system with your own custom invoice PDFs.
+- Just make sure your invoices include:
+  - **Invoice:**
+  - **Date:**
+  - **Vendor:**
+  - **Item list** with:
+    - **Item**, **Qty**, **Unit Price**, **Total**
+
+**Important Notes**  
+The PDF-to-image processor used in this project does **not handle tables well** (e.g. grid-style tables with rows/columns).  
+To ensure better text extraction accuracy:
+- Replace tables with plain **text lists**
+- Or use visual **borders** to separate items, but avoid complex grid layouts
+
+**Invoice numbers must be unique**
+  - Trying to process the same invoice twice with the same number will result in a failure (due to database constraints)
+--- 
 
 ## Access
 
@@ -115,8 +149,8 @@ Logs are output to the console and container logs.
 
 --- 
 
-## Resetting the DB
-To reset the PostgreSQL database run:
+## Resetting the DB and project
+To reset the project and database run:
 
 - docker-compose down -v
 - docker-compose up -d

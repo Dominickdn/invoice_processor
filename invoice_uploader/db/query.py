@@ -10,7 +10,13 @@ def get_invoices_with_items(limit=20, offset=0):
 
     cur.execute(
         """
-        SELECT id, invoice_number, invoice_date, vendor, total_amount_due
+        SELECT id,
+            invoice_number,
+            invoice_date,
+            vendor,
+            total_amount_due,
+            insert_date,
+            file_name
         FROM invoices
         ORDER BY invoice_date DESC
         LIMIT %s OFFSET %s;
@@ -41,12 +47,14 @@ def get_invoices_with_items(limit=20, offset=0):
 
     invoice_map = {}
     for row in invoice_rows:
-        inv_id, number, date, vendor, total = row
+        inv_id, number, date, vendor, total, insert_date, file_name = row
         invoice_map[inv_id] = {
             "invoice_number": number,
             "invoice_date": date,
             "vendor": vendor,
             "total_amount_due": total,
+            "insert_date": insert_date,
+            "file_name": file_name,
             "items": [],
         }
 

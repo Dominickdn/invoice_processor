@@ -1,68 +1,57 @@
 import os
 from botocore.exceptions import ClientError
-from io import BytesIO
-from dotenv import load_dotenv
 from parser import extract_invoice_data
 from db.insert import insert_invoice_data
 from utils.redis_client import r
-from utils.s3_client import s3
-
-load_dotenv()
-
-BUCKET = os.getenv("MINIO_BUCKET")
+from utils.s3_client import upload_to_s3, download_from_s3, delete_from_s3
 
 
-def download_from_s3(prefixed_key):
-    obj = s3.get_object(Bucket=BUCKET, Key=prefixed_key)
-    return BytesIO(obj["Body"].read())
+def get_clean_filename(filepath):
+    """Extract just the filename, stripping any prefixes like 'process/'."""
+    return os.path.basename(filepath)
 
 
-def upload_to_s3(buffer, prefix, filename):
-    s3.upload_fileobj(buffer, BUCKET, f"{prefix}{filename}")
-
-
-def delete_from_s3(prefixed_key):
-    s3.delete_object(Bucket=BUCKET, Key=prefixed_key)
+def move_file_to(bucket_prefix, buffer, filename):
+    """Move file to given prefix (e.g., 'failed/', 'processed/')."""
+    buffer.seek(0)
+    upload_to_s3(buffer, bucket_prefix, filename)
 
 
 def process_file(filename, text):
-    key = f"{filename}"
+    key = filename  # Full S3 key, like 'process/invoice.pdf'
     try:
         body = download_from_s3(key)
     except ClientError as e:
         print(f"[ERROR] Cannot download {key}: {e}")
         return False
 
+    # Extract filename only (e.g. 'invoice.pdf')
+    clean_filename = get_clean_filename(filename)
+    processed_filename = f"processed/{clean_filename}"
+
     try:
-        # Try parsing invoice data from OCR text
         data = extract_invoice_data(text)
     except Exception as e:
         print(f"[ERROR] Failed to parse invoice from {filename}: {e}")
         r.set(key, "failed")
-        body.seek(0)
-        upload_to_s3(body, "failed/", filename)
+        move_file_to("failed/", body, clean_filename)
         delete_from_s3(key)
         return False
 
     try:
-        # Insert into database
-        success = insert_invoice_data(data)
+        success = insert_invoice_data(data, processed_filename)
         if not success:
             raise Exception("Insert failed")
-
     except Exception as e:
         print(f"[ERROR] DB insert failed for {filename}: {e}")
         r.set(key, "failed")
-        body.seek(0)
-        upload_to_s3(body, "failed/", filename)
+        move_file_to("failed/", body, clean_filename)
         delete_from_s3(key)
         return False
 
-    # If everything is successful, move to processed folder
+    # Everything succeeded: move to processed
     print(f"[INFO] Successfully inserted and moving {filename} to processed/")
-    # Redis status updated
     r.set(key, "completed")
-    body.seek(0)
-    upload_to_s3(body, "processed/", filename)
+    move_file_to("processed/", body, clean_filename)
     delete_from_s3(key)
     return True

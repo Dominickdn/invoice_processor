@@ -1,16 +1,29 @@
 import os
 from enqueue_files import enqueue_files
-from ensure_bucket_exists import ensure_bucket_exists
-from flask import Flask, render_template, request, redirect, flash, url_for
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    flash,
+    url_for,
+    send_file,
+)
 from db.query import get_invoices_with_items
 from dotenv import load_dotenv
 from utils.redis_client import r
-from utils.s3_client import s3
+from utils.s3_client import (
+    download_from_s3,
+    upload_to_s3,
+    delete_from_s3,
+    list_files_in_folder,
+    ensure_bucket_exists,
+)
 from werkzeug.utils import secure_filename
 
 load_dotenv()
 app = Flask(__name__)
-app.secret_key = "supersecret"
+app.secret_key = os.getenv("FLASK_SECRET_KEY")
 
 
 BUCKET = os.getenv("MINIO_BUCKET")
@@ -21,13 +34,7 @@ ensure_bucket_exists(BUCKET)
 
 @app.route("/")
 def index():
-    # List all files in the process/ prefix
-    objects = s3.list_objects_v2(Bucket=BUCKET, Prefix=UPLOAD_PREFIX)
-    files = []
-    for obj in objects.get("Contents", []):
-        key = obj["Key"]
-        if not key.endswith("/"):
-            files.append(key.replace(UPLOAD_PREFIX, ""))
+    files = list_files_in_folder(UPLOAD_PREFIX)
     return render_template("index.html", files=files)
 
 
@@ -46,7 +53,7 @@ def upload():
         if file.filename == "":
             continue
         filename = secure_filename(file.filename)
-        s3.upload_fileobj(file, BUCKET, f"{UPLOAD_PREFIX}{filename}")
+        upload_to_s3(file, UPLOAD_PREFIX, filename)
         flash(f"Uploaded: {filename}")
     return redirect(url_for("index"))
 
@@ -80,19 +87,10 @@ def reset_progress():
 
 @app.route("/status")
 def status():
-    def list_files(prefix):
-        response = s3.list_objects_v2(Bucket=BUCKET, Prefix=prefix)
-        contents = response.get("Contents", [])
-        return [
-            obj["Key"].replace(prefix, "")
-            for obj in contents
-            if not obj["Key"].endswith("/")
-        ]
-
-    processed_files = list_files("processed/")
-    failed_files = list_files("failed/")
+    process_files = list_files_in_folder("process/")
+    failed_files = list_files_in_folder("failed/")
     return render_template(
-        "status.html", processed=processed_files, failed=failed_files
+        "status.html", process=process_files, failed=failed_files
     )
 
 
@@ -101,14 +99,15 @@ def delete():
     folder = request.form["folder"]
     filename = request.form["filename"]
 
-    if folder not in ["processed", "failed"]:
+    allowed_folders = ["process", "failed", "processed"]
+    if folder not in allowed_folders:
         flash("Invalid folder.")
         return redirect(url_for("status"))
 
     key = f"{folder}/{filename}"
 
     try:
-        s3.delete_object(Bucket=BUCKET, Key=key)
+        delete_from_s3(key)
         flash(f"Deleted {filename} from {folder}/")
     except Exception as e:
         flash(f"Error deleting file: {str(e)}")
@@ -141,6 +140,18 @@ def invoices():
         page=page,
         has_next=has_next,
     )
+
+
+@app.route("/download/<path:filename>")
+def download_file(filename):
+    prefixed_key = filename
+    try:
+        file_stream = download_from_s3(prefixed_key)
+        return send_file(
+            file_stream, download_name=filename, as_attachment=False
+        )
+    except Exception as e:
+        return f"Error retrieving file: {str(e)}", 404
 
 
 if __name__ == "__main__":

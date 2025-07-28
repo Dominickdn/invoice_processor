@@ -33,18 +33,21 @@
         </ul>
       {% endif %}
     {% endwith %}
-    <!-- Processed Files Section -->
+    <!-- Process Files Section -->
     <div class="bg-gray-800 p-6 rounded-md shadow-md">
-      <h2 class="text-xl font-semibold mb-4">Processed Files</h2>
+      <h2 class="text-xl font-semibold mb-4">Uploaded files</h2>
       <div class="max-h-40 overflow-y-auto custom-scrollbar pr-1">
-        {% if processed %}
+        {% if process %}
           <ul class="space-y-2">
-            {% for file in processed %}
+            {% for file in process %}
               <li class="flex justify-between items-center bg-gray-700 p-2 rounded-md">
                 <span>{{ file }}</span>
                 <form method="POST" action="/delete" class="inline">
-                  <input type="hidden" name="folder" value="processed">
+                  <input type="hidden" name="folder" value="process">
                   <input type="hidden" name="filename" value="{{ file }}">
+                  <button type="submit" class="bg-red-600 hover:bg-red-500 text-white px-3 py-1 rounded-md text-sm">
+                    Delete
+                  </button>
                 </form>
               </li>
             {% endfor %}

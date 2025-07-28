@@ -4,24 +4,8 @@ from botocore.exceptions import ClientError
 from PIL import Image
 import pytesseract
 from pdf2image import convert_from_path
-from io import BytesIO
-from utils.s3_client import s3
+from utils.s3_client import upload_to_s3, download_from_s3, delete_from_s3
 from utils.redis_client import r
-
-BUCKET = os.getenv("MINIO_BUCKET")
-
-
-def download_from_s3(prefixed_key):
-    obj = s3.get_object(Bucket=BUCKET, Key=prefixed_key)
-    return BytesIO(obj["Body"].read())
-
-
-def upload_to_s3(buffer, prefix, filename):
-    s3.upload_fileobj(buffer, BUCKET, f"{prefix}{filename}")
-
-
-def delete_from_s3(prefixed_key):
-    s3.delete_object(Bucket=BUCKET, Key=prefixed_key)
 
 
 def process_file(filename):

@@ -4,7 +4,7 @@ from utils.db_connection import get_db_connection
 load_dotenv()
 
 
-def insert_invoice_data(data):
+def insert_invoice_data(data, file_name):
     """
     Inserts an invoice and its items into the PostgreSQL database.
     Expects data to be a dict with keys:
@@ -16,6 +16,7 @@ def insert_invoice_data(data):
           item (str), qty (int), unit_price (float)
     """
     print(f"[DEBUG] Inserting invoice data: {data}")
+    print(f"[DEBUG] file: {file_name}")
     try:
         conn = get_db_connection()
         cur = conn.cursor()
@@ -24,9 +25,13 @@ def insert_invoice_data(data):
         cur.execute(
             """
             INSERT INTO invoices (
-                invoice_number, invoice_date, vendor, total_amount_due
+                invoice_number,
+                invoice_date,
+                vendor,
+                total_amount_due,
+                file_name
             )
-            VALUES (%s, %s, %s, %s)
+            VALUES (%s, %s, %s, %s, %s)
             RETURNING id;
         """,
             (
@@ -34,6 +39,7 @@ def insert_invoice_data(data):
                 data["invoice_date"],
                 data["vendor"],
                 data["total_amount_due"],
+                f"{file_name}",
             ),
         )
         invoice_id = cur.fetchone()[0]
